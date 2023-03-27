@@ -21,7 +21,9 @@ export default class CardManager {
   static cardTemplate(id, ctegory, text, queue) {
     return `
     <div id="${id}" data-ctegory="${ctegory}" data-queue="${queue}" class="card-item">
-      <p>${text}</p>
+      <div class="card-item-background">
+        <p>${text}</p>
+      </div>
       <div class="card-item-del">&times</div>
     </div>
     `;

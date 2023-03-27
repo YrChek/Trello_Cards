@@ -14,6 +14,8 @@ export default class Events {
     this.clickMouseZ = 0;
     this.offsetElX = 0;
     this.offsetElZ = 0;
+    this.mouseX = 0;
+    this.mouseZ = 0;
     this.actualElement = undefined;
 
     this.pressAdd = this.pressAdd.bind(this);
@@ -57,8 +59,9 @@ export default class Events {
 
   mousedownMouse(e) {
     // e.preventDefault();
-    const el = e.target;
-    if (el.classList.contains('card-item')) {
+    const elDown = e.target;
+    if (elDown.classList.contains('card-item-background')) {
+      const el = elDown.closest('.card-item');
       this.cardItemDel = el.querySelector('.card-item-del');
       this.cardItemDel.style.display = 'none';
       this.doc.style.cursor = 'grabbing';
@@ -95,6 +98,8 @@ export default class Events {
 
   mousemoveMouse(e) {
     e.preventDefault();
+    this.mouseX = e.clientX;
+    this.mouseZ = e.clientY;
     this.actualElement.style.top = `${e.clientY - this.clickMouseZ - this.offsetElZ}px`;
     this.actualElement.style.left = `${e.clientX - this.clickMouseX - this.offsetElX}px`;
     this.positionSelect(e);
@@ -102,12 +107,12 @@ export default class Events {
 
   mouseoverMouse(e) {
     const el = e.target;
-    if (el.classList.contains('card-item')) {
-      this.cardItem = el;
-      this.cardItemDel = el.querySelector('.card-item-del');
+    if (el.classList.contains('card-item-background')) {
+      this.cardItem = el.closest('.card-item');
+      this.cardItemDel = this.cardItem.querySelector('.card-item-del');
       this.cardItemDel.style.display = 'flex';
       this.cardItemDel.addEventListener('click', this.delCard);
-      el.addEventListener('mouseleave', this.displayItemDel);
+      this.cardItem.addEventListener('mouseleave', this.displayItemDel);
     }
   }
 
@@ -119,18 +124,22 @@ export default class Events {
     const afterX = this.actualElement.offsetLeft;
     this.offsetElZ += afterZ - beforeZ;
     this.offsetElX += afterX - beforeX;
+    this.actualElement.style.top = `${this.mouseZ - this.clickMouseZ - this.offsetElZ}px`;
+    this.actualElement.style.left = `${this.mouseX - this.clickMouseX - this.offsetElX}px`;
   }
 
   positionSelect(mouseEvent) {
     const targetElement = mouseEvent.target;
-    if (targetElement.classList.contains('card-item')) {
-      const halfTargetElement = targetElement.offsetTop + targetElement.offsetHeight / 2;
+    if (targetElement.closest('.card-item')) {
+      const parentTargetElement = targetElement.closest('.card-item');
+      const halfTargetElement = parentTargetElement.offsetTop
+      + parentTargetElement.offsetHeight / 2;
       if (mouseEvent.clientY < halfTargetElement) {
-        this.insertElement(targetElement, 'beforebegin', this.actualElement);
+        this.insertElement(parentTargetElement, 'beforebegin', this.actualElement);
         return;
       }
       if (mouseEvent.clientY > halfTargetElement) {
-        this.insertElement(targetElement, 'afterend', this.actualElement);
+        this.insertElement(parentTargetElement, 'afterend', this.actualElement);
         return;
       }
     }
